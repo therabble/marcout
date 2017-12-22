@@ -1,0 +1,14 @@
+[Service]
+WorkingDirectory=/var/www/musicat-marcout
+ExecStart=/usr/local/bin/flask run --port=5020
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=musicat-marcout
+User=web
+Group=web
+Environment="FLASK_APP=marcout-webservice.py"
+
+[Install]
+WantedBy=multi-user.target
