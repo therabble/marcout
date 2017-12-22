@@ -41,7 +41,7 @@ verbose = '--verbose' in call_options
 # get MARCout source
 marcout_source = call_params[0]
 
-content, filepath, patherrors = common.get_param_content(marcout_source)
+content = common.get_param_content(marcout_source)
 
 if verbose:
     if filepath:

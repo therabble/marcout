@@ -62,7 +62,7 @@ def parse_unified_json(param, verbose=False):
 def resolve_unified_json(unified_jsonobj, verbose=False):
     '''This function accepts a parsed JSON object, interprets it,
     and returns a dictionary containing four items:
-        - the MARCout Engine parsed from "marcout_text";
+        - the MARCout Engine parsed from "marcout_sourcecode";
         - the requested serialization, by name;
         - the collection info;
         - the list of records to be exported.
@@ -71,7 +71,7 @@ def resolve_unified_json(unified_jsonobj, verbose=False):
     retval = {}
 
     # defaults for parameter content
-    marcout_text = None
+    marcout_sourcecode = None
     requested_serialization = None
     collection_info = []
     records_to_export = []
@@ -82,7 +82,7 @@ def resolve_unified_json(unified_jsonobj, verbose=False):
 
     # extract unified content into discrete variables
     errors = []
-    json_contentnames = ('marcout_text', 'requested_serialization', 
+    json_contentnames = ('marcout_sourcecode', 'requested_serialization', 
         'collection_info', 'records',)
     
     for contentname in json_contentnames:
@@ -92,7 +92,7 @@ def resolve_unified_json(unified_jsonobj, verbose=False):
         raise ValueError('\n'.join(errors) + '\n')
 
     # populate convenience variables
-    marcout_text = unified_jsonobj['marcout_text']
+    marcout_sourcecode = unified_jsonobj['marcout_sourcecode']
     requested_serialization = unified_jsonobj['requested_serialization']
     collection_info = unified_jsonobj['collection_info']
     records_to_export = unified_jsonobj['records']
@@ -106,8 +106,8 @@ def resolve_unified_json(unified_jsonobj, verbose=False):
 
     # ------------- PARSE MARCout text ----------------
     # unescape characters escaped for JSON
-    marcout_text = marcout_text.replace('\\n', '\n')
-    marcout_text = marcout_text.replace('\\"', '"')
+    marcout_sourcecode = marcout_sourcecode.replace('\\n', '\n')
+    marcout_sourcecode = marcout_sourcecode.replace('\\"', '"')
 
     # one of the returned values. The MARCout Engine is a set of
     # statements to govern selection, content, and formatting for
@@ -115,7 +115,7 @@ def resolve_unified_json(unified_jsonobj, verbose=False):
 
     # Parser is line-oriented. Cut the text clob into array of lines,
     # and parse
-    marcout_lines = marcout_text.split('\n')
+    marcout_lines = marcout_sourcecode.split('\n')
     marcout_engine = parser.parse_marcexport_deflines(marcout_lines)
 
     # Sanity:
@@ -164,15 +164,15 @@ def export_records(unified_jsonobj, as_string=False, verbose=False):
 
     # The Export Workset, without external data dependencies, contains sufficient
     # information to generate a list of exported record datastructures.
-    exports = exporter.export_records_per_marcdef(export_workset, verbose)
+    export_list = exporter.export_records_per_marcdef(export_workset, verbose)
 
     # apply requested serialization
     sz_name = export_workset['serialization']
-    exports = serializer.serialize_records(exports, sz_name)
+    export_list = serializer.serialize_records(export_list, sz_name, verbose)
 
     if as_string:
-        exports = '\n'.join(exports)
+        export_list = '\n'.join(export_list)
 
-    return exports
+    return export_list
 
 

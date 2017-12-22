@@ -60,7 +60,7 @@ def identify_content(content):
     # JSON
     content = content.strip()
     if content.startswith('{'):
-        if '"marcout_text":' in content:
+        if '"marcout_sourcecode":' in content:
             retval = 'JSON'
     else:
         marcout_consistent = True
@@ -81,21 +81,21 @@ def identify_content(content):
 def extract_marcout_from_json(jsonobj):
     retval = None
     try:
-        retval = jsonobj['marcout_text']
+        retval = jsonobj['marcout_sourcecode']
     except Exception as e:
         raise e
     return retval
 
 
-def unescape_marcout(marcout_text):
-    retval = marcout_text.replace('\\n', '\n')
+def unescape_marcout(marcout_sourcecode):
+    retval = marcout_sourcecode.replace('\\n', '\n')
     retval = retval.replace('\\"', '"')
     retval = retval.replace('\\t', '\t')
     return retval
 
 
-def escape_marcout(marcout_text):
-    retval = marcout_text.replace('\n', '\\n')
+def escape_marcout(marcout_sourcecode):
+    retval = marcout_sourcecode.replace('\n', '\\n')
     retval = retval.replace('"', '\\"')
     retval = retval.replace('\t', '\\t')
     return retval
@@ -128,7 +128,7 @@ PARAMETERS:
 
     --extract-marcout: *The unified-json parameter must be present*.
     This script will extract the raw MARCout content of the JSON's
-    "marcout_text" property.
+    "marcout_sourcecode" property.
 
     --unescape-marcout: *If the unified-json source parameter is present,
         this script will unescape the value of its ./marcout-text property;
@@ -146,7 +146,7 @@ PARAMETERS:
     --update-json: *Both unified-json and marcout-source parameters must be 
         present, AND the unified-json must be a file, not raw content*.
         The script will perforn an --escape-marcout on the MARCout source,
-        and overwrite the JSON's "marcout_text" property with the result.
+        and overwrite the JSON's "marcout_sourcecode" property with the result.
 
     --verbose: causes print of extra informative/diagnostic content to stdout.
 
@@ -247,6 +247,7 @@ elif call_options[0] == '--escape-marcout':
         # TODO this is fucked up - unescapes itself??
         escaped = escape_marcout(marcout)
         print(escaped)
+
 
 elif call_options[0] == '--update-json':
     arg_error = False

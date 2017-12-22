@@ -500,6 +500,7 @@ def compute_expr(expr, current_rec_extracts, collection_info):
                     print('EXTRACT: ' + str(extract))
 
                 extractval = current_rec_extracts[extract]
+
                 if debug_output:
                     print('EXTRACTVAL: ' + str(extractval))
                     print('IS STR: ' + str(isinstance(extractval, str)))
@@ -528,20 +529,30 @@ def compute_expr(expr, current_rec_extracts, collection_info):
                     print('TOKEN: ' + token)
 
         # whatever modifications have been made to token, update the tokens list
-        tokens[indx] = token
+
+        if str(token) == 'None':
+            token = '"' + str(token) + '"'
+
+        tokens[indx] = str(token)
 
     # concat tokens into content
     evaluable = ''.join(tokens)
 
-    retval = None
+    retval = ''
 
     # this second-stage eval applies functions, concats, etc
     if evaluable:
-        if debug_output:
-            print('EVALUATING "' + evaluable + '"')
-        retval = eval(evaluable)
-        if debug_output:
-            print('EVALUATED TO: ' + str(retval))
+        try:
+            if debug_output:
+                print('EVALUATING "' + evaluable + '"')
+            retval = eval(evaluable)
+            if debug_output:
+                print('EVALUATED TO: ' + str(retval))
+        except Exception as ex:
+            if verbose:
+                print('tokens: ')
+                print(tokens)
+                print('DIED ON ' + evaluable)
 
     return retval
 
@@ -601,6 +612,14 @@ def export_records_per_marcdef(export_workset, verbose):
     RETURNS a List of exported records
     '''
 
+    if verbose:
+        print()
+        print('=============================================')
+        print('SERIALIZER INPUT: EXPORT_WORKSET')
+        print(export_workset)
+        print('=============================================')
+        print()
+
 
     # return value
     exported_marc_records = []
@@ -630,9 +649,34 @@ def export_records_per_marcdef(export_workset, verbose):
             # coerce to strings
             varname = str(key)
             varval_expr = str(engine_json_extractors[key])
-            varval = eval(varval_expr)
+
+            if verbose:
+                indent = ' ' * 2
+                print(indent + 'resolving `' + varname + ': ' + varval_expr)
+
+            # apply any defaults left embedded by parser
+            default = ''
+            if '::DEFAULT' in varval_expr:
+                varval_expr, default = varval_expr.split('::DEFAULT')
+                varval_expr = varval_expr.rstrip()
+                default = default.strip()
+
+            try:
+                varval = eval(varval_expr)
+            except Exception as e:
+                if verbose:
+                    indent = ' ' * 4
+                    print(indent + 'ATTEMPTING TO RESOLVE `' + varval_expr + '`')
+                    print(indent + 'EVAL EXCEPTION of type "' + str(type(e)) + '":')
+                    print(e)
+                    print(indent + indent + 'APPLYING DEFAULT `' + default + '`')
+                    print()
+                varval = default
 
             # add evaluation of varval to current_rec_extracts
+            if verbose:
+                indent = ' ' * 2
+                print(indent + 'adding `' + str(varval) + '` to current_rec_extracts')
             current_rec_extracts[varname] = varval
 
 
@@ -667,9 +711,24 @@ def export_records_per_marcdef(export_workset, verbose):
                     # being filled and placed in the return
                     continue
 
-            record_output.append(export_marc_field(template, current_rec_extracts, collection_info))
+            exported_field = export_marc_field(template, current_rec_extracts, collection_info)
+            if verbose:
+                indent = ' ' * 2
+                print(indent + 'EXPORTING ' + template['tag'])
+
+            record_output.append(exported_field)
 
         # put all of the fields for this record in the return val
         exported_marc_records.append(record_output)
+
+
+    if verbose:
+        print()
+        print('=============================================')
+        print('SERIALIZER OUTPUT: EXPORTED_MARC_RECORDS:')
+        print(exported_marc_records)
+        print('=============================================')
+        print()
+
 
     return exported_marc_records

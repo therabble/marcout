@@ -23,7 +23,7 @@ def export_records(unified_json_parameter, verbose=False):
     retval = ''
 
     # defaults for parameters and derived content
-    marcout_text = None
+    marcout_sourcecode = None
     marcout_defn_structure = None
     collection_info = []
     records_to_export = []
@@ -44,7 +44,7 @@ def export_records(unified_json_parameter, verbose=False):
         retval += 'UNIFIED JSON PARAMETER PARSED SUCCESSFULLY.\n'
 
     # extract unified content into discrete variables
-    marcout_text = unified_json_obj['marcout_text']
+    marcout_sourcecode = unified_json_obj['marcout_sourcecode']
     records_to_export = unified_json_obj['records']
     collection_info = unified_json_obj['collection_info']
     requested_serialization = unified_json_obj['requested_serialization']
@@ -57,11 +57,11 @@ def export_records(unified_json_parameter, verbose=False):
 
     # ------------- PARSE MARCout text ----------------
     # unescape characters escaped for JSON
-    marcout_text = marcout_text.replace('\\n', '\n')
-    marcout_text = marcout_text.replace('\\"', '"')
+    marcout_sourcecode = marcout_sourcecode.replace('\\n', '\n')
+    marcout_sourcecode = marcout_sourcecode.replace('\\"', '"')
 
     # cut the text clob into array of lines, and parse
-    marcout_lines = marcout_text.split('\n')
+    marcout_lines = marcout_sourcecode.split('\n')
     marcout_structures = parse_marcexport_deflines(marcout_lines)
 
     # convenience variables for MARCout export definitions

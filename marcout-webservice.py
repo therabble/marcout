@@ -16,8 +16,10 @@ verbose_in_export = False
 # ("views" are Flask's simple interface to the WSGI engine.)
 @app.route('/api/marcout/1.0/',  methods=['GET', 'POST'])
 def marcout_export():
-    
+
     if request.method == 'GET':
+
+        # return
         hlomsg = 'Welcome to the MARCout Export Service!\n\n'
         hlomsg += 'To use the service:\n'
         hlomsg += 'You need POST not GET;\n'
@@ -27,16 +29,23 @@ def marcout_export():
         return hlomsg
 
     elif request.method == 'POST':
+        print('POST! It is a POST!')
+        print('HEADERS:')
+        print(request.headers)
+        print()
         # we need the JSON unified parameter. Force=True will get JSON whether
         # the HTTP Content-Type is application/json or not.
         json_param = request.get_json(force=True)
-        # print('JSON:')
-        # print(json_param)
+        print('JSON:')
+        print(json_param)
         # use the marcout module to return the desired serialization
         serialized_records = ''
         try:
             serialized_records = marcout.export_records(json_param, as_string=True, verbose=verbose_in_export)
             # For a string return, HTTP 200 is automatically provided from inner WSGI
+            print()
+            print(serialized_records)
+            
             return serialized_records
         except Exception as ex:
             print(ex)

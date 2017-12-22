@@ -8,13 +8,15 @@ import marcout_iso2709 as iso
 # ================== SERIALIZATION FUNCTIONS ==================================
 
 
-def serialize_text(marc_record_fields):
+def serialize_text(marc_record_fields, verbose):
 
-    print()
-    print('==================================================')
-    print(marc_record_fields)
-    print('==================================================')
-    print()
+    if verbose:
+        print()
+        print('==================================================')
+        print('SERIALIZING:')
+        print(marc_record_fields)
+        print('==================================================')
+        print()
 
     retval = ''
 
@@ -66,7 +68,7 @@ def serialize_text(marc_record_fields):
                 # subfield dict should only ever have one key & 
                 # one associated value.
                 subfield_code = list(subfield.keys())[0]
-                subfield_val = subfield[subfield_code]
+                subfield_val = str(subfield[subfield_code])
                 retval += subfield_code
                 retval += subfield_val
         if 'terminator' in field:
@@ -76,7 +78,7 @@ def serialize_text(marc_record_fields):
 
     return retval
 
-def serialize_iso2709(marc_record_fields):
+def serialize_iso2709(marc_record_fields, verbose):
 
     retval = ''
 
@@ -86,25 +88,25 @@ def serialize_iso2709(marc_record_fields):
     return retval
 
 
-def serialize_raw(marc_record_fields):
+def serialize_raw(marc_record_fields, verbose):
     '''Returns serialized data structures in Python/Javascript evaluable form.
     '''
     return str(marc_record_fields)
 
 
-def serialize_xml(marc_record_fields):
+def serialize_xml(marc_record_fields, verbose):
     '''Returns MARCXML representation
     '''
     raise Exception('serialize_xml not yet implemented.')
 
 
-def serialize_records(marc_record_list, sz_name):
+def serialize_records(marc_record_list, sz_name, verbose=False):
     '''Accepts a list of MARCout records in raw data form and applies
     requested serialization to each.
     '''
     retval = []
     for marc_record in marc_record_list:
-        retval.append(serializations[sz_name](marc_record))
+        retval.append(serializations[sz_name](marc_record, verbose))
 
     return retval
 

@@ -1,5 +1,5 @@
 
-DESCRIPTION--------------------------------------
+DESCRIPTION---------NASHVILLE (EXAMPLE ONLY!)--------
 
 MARCout is a high-level language for defining MARC bibliographic record
 exports. It's currently developed for MUSICat album records.
@@ -60,7 +60,7 @@ JSON EXTRACTED PROPERTIES------------------------
 
     submission_round = album_json['album']['round']
 
-    album_tracks = album_json['album']['tracks'] ::DEFAULT []
+    album_tracks = album_json['album']['tracks']
 
     spoken_languages = album_json['album']['spoken_languages']
 
@@ -127,9 +127,9 @@ LDR:
     BIBLIO CODES
         LDR POS: 05 - Record status # (default "n": New Record)
             OVERRIDE: 
-        LDR POS: 06 - Type of record # (default "j": New Record)
+        LDR POS: 06 - Type of record # (default "j": Musical sound recording)
             OVERRIDE: 
-        LDR POS: 07 - Bibliographic level # (default "m": New Record)
+        LDR POS: 07 - Bibliographic level # (default "m": Monograph/Item)
             OVERRIDE: 
         LDR POS: 08 - Type of control
             OVERRIDE: 

@@ -4,5 +4,5 @@ are entering them from the root of your local copy of this git repo.
 You can enter them from anyplace, but you will have to edit the file paths
 accordingly.
 
-
-curl -X POST -d @unified-json.json http://localhost:5020/api/marcout/1.0/
+FOR MARC21 ISO 2709 binary:
+curl -X POST -d @examples/unified-json.json http://localhost:5020/api/marcout/1.0/
