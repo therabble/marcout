@@ -326,32 +326,44 @@ def compute_control_number(album_id, collection_abbr):
     return control_number
 
 
-def map_target_audience(target_audience,explicit):
+def map_target2_audience(target_audience,explicit):
     #The 23rd value in the 008 field: e - Adult, j - Juvenile
     #MUSICat album json intendedAudienceOptions are "adult", "juvenile"
-    mapped_target_audience = '\\'
-    if target_audience == 'juvenile'
-        mapped_target_audience = 'j'
-    if explicit == true
-        mapped_target_audience = 'e'
-    return mapped_target_audience;
+    mapped_audience_result = '\\'
+    if target_audience == 'juvenile':
+      mapped_audience_result = 'j'
+    if explicit == True:
+      mapped_audience_result = 'e'
+    return mapped_audience_result
 
 
 def yymmdd_date(date):
     #the 008 field starts with an immutable date the record was first created on
-    yymmdd_date = 180131 #when you know what you are getting, make a yymmdd date from date passed
+    #expects a normalized date.
+    yymmdd_date = '\\\\\\\\\\\\'
+    if date:
+      yy_string = date.split("-")[0][2:4]    # last 2 chars of year
+      mm_string = date.split("-")[1]   # 2 digit month
+      dd_string = date.split("-")[2]   # 2 digit day
+      yymmdd_date = yy_string + mm_string + dd_string    #when you know what you are getting, make a yymmdd date from date passed
     return yymmdd_date
 
 
-def map_capture_technique(capture_technique):
+
+def map_capture2_technique(capture_technique):
     #The last value in the 007 field: e = analog, d = digital, u = unknown
     #MUSICat album json captureTechniqueOptions are "analog", "digital"
-    mapped_capture_technique = 'u'
-    if capture_technique == 'analog'
-        mapped_capture_technique = 'a'
-    if capture_technique == 'digital'
-        mapped_capture_technique = 'd'
-    return mapped_capture_technique;
+    mapped_capture_result = 'u'
+    if capture_technique == 'analog':
+      mapped_capture_result = 'a'
+    if capture_technique == 'digital':
+      mapped_capture_result = 'd'
+    return mapped_capture_result
+
+
+def foo(bar):
+    baz = bar
+    return baz;
 
 
 # =============================================================================
