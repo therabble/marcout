@@ -14,8 +14,8 @@ debug_output = False
 
 # FUNCTIONS IMPLICITLY CALLED WHEN PARSER FINDS KEYWORD
 
-# - `IS`: operator that compares two sub-expressions for equality. 
-#     Equivalent to `==` in Python or JavaScript. No function: direct 
+# - `IS`: operator that compares two sub-expressions for equality.
+#     Equivalent to `==` in Python or JavaScript. No function: direct
 #     substitution in parser.
 
 # `PRESENT`: an expression is `PRESENT` if it can be evaluated.
@@ -97,7 +97,7 @@ def marcout_is_false(expr):
         return False
 
 
-# - `HAS VALUE`: postfix operator that resolves to True if the preceding 
+# - `HAS VALUE`: postfix operator that resolves to True if the preceding
     # expression is PRESENT and not `EMPTY`. In other words, the expression
     # has meaning over and above the ambiguous empty values.
 
@@ -219,12 +219,12 @@ def release_decade(release_date):
     decade_literal = str(decade_number) + "1-" + str(decade_number + 1) + "0";
     return decade_literal
 
-    
+
 
 def pretty_comma_list(listexpr, oxford=False):
     '''Accepts a comma separated list in string form, and a boolean
     that, if set to True, will stipulate use of the Oxford comma.
-    Returns the list with leading and trailing whitespace stripped from 
+    Returns the list with leading and trailing whitespace stripped from
     list items, separated by commas, with " and " inserted in lieu of
     the final separator.'''
 
@@ -323,8 +323,47 @@ def compute_control_number(album_id, collection_abbr):
     # put it all together
     control_number = collection_abbr.lower() + '_' + sha[-7:] + 'a'
 
-    return control_number;
+    return control_number
 
+
+def map_target2_audience(target_audience,explicit):
+    #The 23rd value in the 008 field: e - Adult, j - Juvenile
+    #MUSICat album json intendedAudienceOptions are "adult", "juvenile"
+    mapped_audience_result = '\\'
+    if target_audience == 'juvenile':
+      mapped_audience_result = 'j'
+    if explicit == True:
+      mapped_audience_result = 'e'
+    return mapped_audience_result
+
+
+def yymmdd_date(date):
+    #the 008 field starts with an immutable date the record was first created on
+    #expects a normalized date.
+    yymmdd_date = '\\\\\\\\\\\\'
+    if date:
+      yy_string = date.split("-")[0][2:4]    # last 2 chars of year
+      mm_string = date.split("-")[1]   # 2 digit month
+      dd_string = date.split("-")[2]   # 2 digit day
+      yymmdd_date = yy_string + mm_string + dd_string    #when you know what you are getting, make a yymmdd date from date passed
+    return yymmdd_date
+
+
+
+def map_capture2_technique(capture_technique):
+    #The last value in the 007 field: e = analog, d = digital, u = unknown
+    #MUSICat album json captureTechniqueOptions are "analog", "digital"
+    mapped_capture_result = 'u'
+    if capture_technique == 'analog':
+      mapped_capture_result = 'a'
+    if capture_technique == 'digital':
+      mapped_capture_result = 'd'
+    return mapped_capture_result
+
+
+def foo(bar):
+    baz = bar
+    return baz;
 
 
 # =============================================================================
@@ -377,9 +416,9 @@ def rewrite_for_context(marcout_expr, context_expr, context_varname):
 
 
 def evaluate_foreach(foreach_def_block, current_rec_extracts, collection_info):
-    '''This function analyzes, sorts, and computes MARC subfield content 
+    '''This function analyzes, sorts, and computes MARC subfield content
     that is defined in a MARCout FOREACH block.
-    It returns each subfield's content, properly rendered, with declared 
+    It returns each subfield's content, properly rendered, with declared
     demarcators(prefix, suffix) in a List,
     ordered according to the SORTBY property of the foreach block.
     '''
@@ -422,8 +461,8 @@ def evaluate_foreach(foreach_def_block, current_rec_extracts, collection_info):
 
     # NOTES ABOUT SORTING:
 
-    # 1) This sort sorts the GROUPS (e.g. all tracks in an album) and 
-    # does not touch the subfield ordering WITHIN a group. The internal 
+    # 1) This sort sorts the GROUPS (e.g. all tracks in an album) and
+    # does not touch the subfield ordering WITHIN a group. The internal
     # subfield ordering is established in the MARCout declaration.
 
     # 2) The sort key is evaluated by evaluating the group-level SORT BY
@@ -446,7 +485,7 @@ def evaluate_foreach(foreach_def_block, current_rec_extracts, collection_info):
         # this respects subfield definition order
         for subfield_def in subfield_defs:
 
-            # a subfield_def is a dict of form 
+            # a subfield_def is a dict of form
             # {subfield_code: evaluable expression}
             for subcode in subfield_def.keys():
                 if subcode.startswith('group_'):
@@ -480,7 +519,7 @@ def evaluate_foreach(foreach_def_block, current_rec_extracts, collection_info):
 def compute_expr(expr, current_rec_extracts, collection_info):
     retval = expr
 
-    # this is a parse 
+    # this is a parse
     tokens = parser.tokenize(expr)
     for indx, token in enumerate(tokens):
         if debug_output:
@@ -585,12 +624,12 @@ def export_marc_field(template, current_rec_extracts, collection_info):
                     subfield_dict[subfield_code] = compute_expr(subfield_dict[subfield_code], current_rec_extracts, collection_info)
 
         elif propname == 'foreach':
-            # this is a dict. Keys are 
-            # 'demarcator': literal, 
-            # 'itemsource': expr, 
-            # 'sortby': array of exprs, e.g. ['track::position'], 
+            # this is a dict. Keys are
+            # 'demarcator': literal,
+            # 'itemsource': expr,
+            # 'sortby': array of exprs, e.g. ['track::position'],
             # 'subfields': array of subfield dicts, e.g. [{'t': 'track::title'}, {'g': 'render_duration(track::duration)'}],
-            # 'eachitem': name assigned for notation. e.g. 'track', 
+            # 'eachitem': name assigned for notation. e.g. 'track',
             retval[propname] = evaluate_foreach(retval[propname], current_rec_extracts, collection_info)
 
         elif propname in('export_if', 'export_if_not'):
@@ -605,8 +644,8 @@ def export_records_per_marcdef(export_workset, verbose):
     necessary information to export the records it contains:
     {
         'marcout_engine': marcout_engine parsed from MARCout export definition document
-        'serialization': sz_name : valid serialization name from unified JSON 
-        'collection_info': collection info from unified JSON 
+        'serialization': sz_name : valid serialization name from unified JSON
+        'collection_info': collection info from unified JSON
         'records_to_export': expected JSON representation of records
     }
     RETURNS a List of exported records
@@ -635,7 +674,7 @@ def export_records_per_marcdef(export_workset, verbose):
         album_json = record
 
         # Extract content of JSON record into locally scoped variables.
-        # This reconstructs the assignment form in the original 
+        # This reconstructs the assignment form in the original
         # MARCout syntax.
         # These variables will then be referenceable in the
         # MARC field template expressions.
@@ -681,17 +720,17 @@ def export_records_per_marcdef(export_workset, verbose):
 
 
         # TODO ensure named functions are also in scope.
-        
+
 
         # Populate MARC field data structures by copying templates and
         # evaluating from the JSON content
         # and the application of the MARCout functions.
 
         record_output = []
-        # need to use copy.deepcopy to avoid modifying templates: otherwise 
+        # need to use copy.deepcopy to avoid modifying templates: otherwise
         # content would be propagated forward into a subsequent record, which
         # would blow things up: eval() on *values*, rather than parsed MARCout
-        # expressions, would generally not work. (And in cases where it DID 
+        # expressions, would generally not work. (And in cases where it DID
         # work, that would be even worse, creating corrupt records.)
         for template in copy.deepcopy(engine_field_templates):
 
@@ -707,7 +746,7 @@ def export_records_per_marcdef(export_workset, verbose):
                 evaluated_conditional = compute_expr(template['export_if_not'], current_rec_extracts, collection_info)
                 # print('evaluates to: ' + str(evaluated_conditional))
                 if evaluated_conditional:
-                    # fail: the True condition prevents this template from 
+                    # fail: the True condition prevents this template from
                     # being filled and placed in the return
                     continue
 
