@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# This module contains necessary functions and content to convert 
+# This module contains necessary functions and content to convert
 #  a MARCout export definition source file into a MARCout Export Engine.
 
 import copy
@@ -28,12 +28,12 @@ marcout_keyword_replacements = {
 }
 
 marcout_rewrites = {
-    
-    # - `IS`: operator that compares two sub-expressions for equality. 
+
+    # - `IS`: operator that compares two sub-expressions for equality.
     #     Equivalent to `==` in Python.
     ' IS ': [' == ', 'replace'],
 
-    # - `IS NOT`: infix operator that compares two sub-expressions for inequality. 
+    # - `IS NOT`: infix operator that compares two sub-expressions for inequality.
     #     Equivalent to `!=` in Python.
     ' IS_NOT ': [' != ', 'replace'],
 
@@ -45,7 +45,7 @@ marcout_rewrites = {
     #     expression is true, for MARCout values of `FALSE`.
     ' IS_FALSE': ['marcout_is_false', 'postfix'],
 
-    # - `HAS VALUE`: postfix operator that resolves to True if the preceding 
+    # - `HAS VALUE`: postfix operator that resolves to True if the preceding
     #     expression is PRESENT and not `EMPTY`. In other words, the expression
     #     has meaning over and above the ambiguous empty values.
     ' HAS_VALUE': ['marcout_has_value', 'postfix'],
@@ -55,7 +55,7 @@ marcout_rewrites = {
     ' HAS_NO_VALUE': ['marcout_has_no_value', 'postfix'],
 
     # - `NOTHING`: alias (non-operator) keyword for generation of an empty value.
-    #     Depending on context, makes an empty string, or a non-value such as 
+    #     Depending on context, makes an empty string, or a non-value such as
     #     Python `None` or JSON `null`.
     'NOTHING': ['marcout_nothing_value', 'replace'],
 
@@ -97,7 +97,7 @@ def rewrite_keyword_expr(expr):
     with equivalent expressions in order to create an evaluable expression
     form. Sometimes, as in the case of postfix expressions, it's necessary to
     reorder the parts of the expression. Note that the resulting expression
-    cannot, in general, be evaluated until the content of a JSON record is 
+    cannot, in general, be evaluated until the content of a JSON record is
     available.
     '''
     retval = expr
@@ -122,7 +122,7 @@ def rewrite_keyword_expr(expr):
 
             elif replacement_mode == 'postfix':
                 # the replacement value is a function name with a single
-                # argument. The argument is the entire exression, but with the 
+                # argument. The argument is the entire exression, but with the
                 # keyword removed)
                 retval = replacement + '(' + retval.replace(keyword, '') + ')'
 
@@ -142,12 +142,12 @@ def rewrite_keyword_expr(expr):
 def render_ldr(ldr_field_def):
     '''Accepts a field dict of the following general type:
     {'tag': 'LDR',
-    '17': 'e', 
-    '19': 'g', 
-    'terminator': '.', 
-    '05': 'a', 
-    '06': 'b', 
-    '07': 'c', 
+    '17': 'e',
+    '19': 'g',
+    'terminator': '.',
+    '05': 'a',
+    '06': 'b',
+    '07': 'c',
     '18': 'f'}
     returns the 24-character representation with zeroes for run time content,
     spaces for non-valued content.
@@ -167,7 +167,7 @@ def render_ldr(ldr_field_def):
             # this is something to write
             pos = int(key)
             retval = retval[:pos] + ldr_field_def[key] + retval[pos + 1:]
-    
+
     return retval.replace('.', ' ')
 
 
@@ -179,7 +179,7 @@ def parse_marcexport_deflines(deflines):
     From those blocks, it parses source content for the different
     categories of information. (It ignores "DESCRIPTION", which is
     non-machine-parseable documentation for humans.)
-    
+
     From the content, it parses a dictionary/map/hash/object of marcexport
     datastructures:
         - 'known_parameters', required parameters
@@ -201,7 +201,9 @@ def parse_marcexport_deflines(deflines):
         if line.strip().startswith('#'):
             # it's only a comment line. ignore
             continue
+        line = line.replace("\#","[[[ESCAPED_POUND]]]")
         line = line.split('#')[0].rstrip()
+        line = line.replace("[[[ESCAPED_POUND]]]","#")
         #note that we PRESERVE empty lines: they are significant
         contentlines.append(line.rstrip())
 
@@ -229,7 +231,7 @@ def parse_marcexport_deflines(deflines):
     marcdefs['parse_order'] = parse_order
 
     # KNOWN PARAMETERS:
-    # what needs to be passed in for some things to work -- 
+    # what needs to be passed in for some things to work --
     # in codebase, some are environment variables;
     # at command line, they must be explicitly passed.
     paramnames = []
@@ -263,7 +265,7 @@ def parse_marcexport_deflines(deflines):
         # someone might put some equals signs in the expr - condition or something
         marcdefs['json_extracted_properties'][parts[0].strip()] = ('='.join(parts[1:])).strip()
 
-    # FIELD TEMPLATES: 
+    # FIELD TEMPLATES:
     # ordered sequence of templates for MARC fields
     marcdefs['marc_field_templates'] = None
 
@@ -395,7 +397,7 @@ def parse_marcexport_deflines(deflines):
             suffix_expr = value_after_first(line, ':')
             current_field['foreach']['suffix'] = suffix_expr
 
-        # "we do not want to grab subfields that are within a" ... 
+        # "we do not want to grab subfields that are within a" ...
         # ("within a " what? guess I got distracted.) TODO figure this out
         elif line.startswith('SUBFIELD:'):
             if 'subfields' not in current_field:
@@ -414,7 +416,7 @@ def parse_marcexport_deflines(deflines):
                 terminator_expr = None
             current_field['terminator'] = terminator_expr
 
-    # the LDR field needs to be represented as 24 chars. Might as well 
+    # the LDR field needs to be represented as 24 chars. Might as well
     # do it here -- no further changes until len() and offset computations.
     LDR_template = None
     for indx, template in enumerate(field_data):
@@ -443,11 +445,11 @@ def parse_marcexport_deflines(deflines):
 # In MARC fields, the "tag", "indicator 1", and "indicator 2" values are
 # fixed; their values are defined in the MARCout export definition.
 #
-# Subfield content, on the other hand, often includes values extracted from 
+# Subfield content, on the other hand, often includes values extracted from
 # the album JSON
 
 # This is a simplistic stack-based recursive descent parse with implicit
-# grammar for subfield expressions in marcexport.define. 
+# grammar for subfield expressions in marcexport.define.
 # The "delims" structure is a stack which grows as new opening delimiters
 # occur, and shrinks as corresponding closing delimiters occur.
 #
@@ -460,7 +462,7 @@ def parse_marcexport_deflines(deflines):
 # As the name suggests, these kinds of delimiters can be meaningfully
 # nested
 #
-# The parse separates the expression into syntactically significant 
+# The parse separates the expression into syntactically significant
 # character sequences, as noted in the `tokenize` function string.
 
 
@@ -474,7 +476,7 @@ def closes_delim(delims, char):
     openchar = delims[-1]
 
     if openchar in opaques:
-        # We are in a string literal. Nothing but the corresponding 
+        # We are in a string literal. Nothing but the corresponding
         # close quote will have any effect.
         return (char == opaques[openchar])
     if openchar in nestables:
@@ -502,12 +504,12 @@ def opens_delim(delims, char):
         return (char in opaques) or (char in nestables)
 
     if delims[-1] in opaques:
-        # We are in a string literal, so no delimiter can open a nested block. 
+        # We are in a string literal, so no delimiter can open a nested block.
         # This is what "opaque" means. A quoted literal can contain anything;
         # opening delimiters are insignificant.
         return False
     elif delims[-1] in nestables:
-        # We're in a nested block. We can open either a string literal 
+        # We're in a nested block. We can open either a string literal
         # or a nested block here.
         return char in opaques or char in nestables
     else:
@@ -536,7 +538,7 @@ def tokenize(expr):
      - extracted property names, resolved at JSON --> MARC export time
 
     Concatenating the blocks in this return value recreates the `expr`
-    parameter. This is a lossless transformation. 
+    parameter. This is a lossless transformation.
     '''
     token_blocks = []     # sequence of blocks
     current_block = ''

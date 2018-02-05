@@ -39,7 +39,7 @@ def export_records(unified_json_parameter, verbose=False):
 
     # should be JSON
     # unified_json_parameter = str(unified_json_parameter)
-    
+
     if verbose:
         retval += 'UNIFIED JSON PARAMETER PARSED SUCCESSFULLY.\n'
 
@@ -76,7 +76,7 @@ def export_records(unified_json_parameter, verbose=False):
     # are present in the JSON unified parameter, and vice versa
     marcout_paramnames = set(expdef_paramnames)
     json_paramnames = set(collection_info.keys())
-    # Set math: symmetric difference `^` operator will return empty 
+    # Set math: symmetric difference `^` operator will return empty
     # set if no mismatch between operands:
     all_mismatches = marcout_paramnames ^ json_paramnames
 
@@ -118,7 +118,7 @@ def export_records(unified_json_parameter, verbose=False):
         album_json = record
 
         # Extract content of JSON record into locally scoped variables.
-        # This reconstructs the assignment form in the original 
+        # This reconstructs the assignment form in the original
         # MARCout syntax.
         # These variables will then be referenceable in the
         # MARC field template expressions.
@@ -160,10 +160,10 @@ def export_records(unified_json_parameter, verbose=False):
         # and the application of the MARCout functions.
 
         record_output = []
-        # need to use copy.deepcopy to avoid modifying templates: otherwise 
+        # need to use copy.deepcopy to avoid modifying templates: otherwise
         # content would be propagated forward into a subsequent record, which
         # would blow things up: eval() on values, rather than parsed MARCout
-        # expressions, would generally not work. (And in cases where it DID 
+        # expressions, would generally not work. (And in cases where it DID
         # work, that would be even worse, creating corrupt records.)
         for template in copy.deepcopy(expdef_field_templates):
 
@@ -179,7 +179,7 @@ def export_records(unified_json_parameter, verbose=False):
                 evaluated_conditional = compute_expr(template['export_if_not'], current_rec_extracts, collection_info)
                 # print('evaluates to: ' + str(evaluated_conditional))
                 if evaluated_conditional:
-                    # fail: the True condition prevents this template from 
+                    # fail: the True condition prevents this template from
                     # being filled and placed in the return
                     continue
 
@@ -187,7 +187,7 @@ def export_records(unified_json_parameter, verbose=False):
 
         exported_marc_records.append(record_output)
 
-        if verbose:   
+        if verbose:
             retval += '\n'
             retval += '-------------------------------\n'
             for item in exported_marc_records:
