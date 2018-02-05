@@ -340,8 +340,9 @@ def map_target2_audience(target_audience,explicit):
 def yymmdd_date(date):
     #the 008 field starts with an immutable date the record was first created on
     #expects a normalized date.
-    yymmdd_date = '\\\\\\\\\\\\'
-    if date:
+    yymmdd_date = 'Error.'
+    if date and len(date) == 10:
+      #expects a normalized date, which will be 10 characters long yyyy-mm-dd.
       yy_string = date.split("-")[0][2:4]    # last 2 chars of year
       mm_string = date.split("-")[1]   # 2 digit month
       dd_string = date.split("-")[2]   # 2 digit day
@@ -390,6 +391,8 @@ def compute_extracts(extract_block, jsonobj):
         extracted_val = eval(extract_block[propname])
         # print(extracted_val)
         retval[propname] = extracted_val
+    #    if retval[propname] == None:
+    #        retval[propname] = ''
     return retval
 
 
@@ -588,7 +591,7 @@ def compute_expr(expr, current_rec_extracts, collection_info):
             if debug_output:
                 print('EVALUATED TO: ' + str(retval))
         except Exception as ex:
-            if verbose:
+            if True:     #this should be verbose, but it's not currently passed in. we should fix. GALA.
                 print('tokens: ')
                 print(tokens)
                 print('DIED ON ' + evaluable)

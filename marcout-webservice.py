@@ -8,7 +8,7 @@ from flask import Flask, request
 # instantiate our flask container app
 app = Flask(__name__)
 
-verbose_in_export = False
+verbose_in_export = True
 
 # t\This decorator is the Flask pattern matcher for this path and
 # these methods. If GET is defined, HEAD will be provided for
@@ -45,7 +45,7 @@ def marcout_export():
             # For a string return, HTTP 200 is automatically provided from inner WSGI
             print()
             print(serialized_records)
-            
+
             return serialized_records
         except Exception as ex:
             print(ex)
