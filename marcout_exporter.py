@@ -342,6 +342,7 @@ def yymmdd_date(date):
     #expects a normalized date.
     yymmdd_date = 'Error.'
     if date and len(date) == 10:
+      #expects a normalized date, which will be 10 characters long yyyy-mm-dd.
       yy_string = date.split("-")[0][2:4]    # last 2 chars of year
       mm_string = date.split("-")[1]   # 2 digit month
       dd_string = date.split("-")[2]   # 2 digit day
