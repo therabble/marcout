@@ -8,7 +8,7 @@ from flask import Flask, request
 # instantiate our flask container app
 app = Flask(__name__)
 
-verbose_in_export = True
+verbose_in_export = False
 
 # t\This decorator is the Flask pattern matcher for this path and
 # these methods. If GET is defined, HEAD will be provided for
