@@ -295,7 +295,7 @@ def total_play_length(tracks):
         try:
             float_seconds += track['duration']
         except:
-            print('=========================================== ERROR:')
+            print('marcout_exporter: Error adding track duration in total_play_length')
             print(track)
     return h_m_s(float_seconds)
 
@@ -591,7 +591,7 @@ def compute_expr(expr, current_rec_extracts, collection_info):
             if debug_output:
                 print('EVALUATED TO: ' + str(retval))
         except Exception as ex:
-            if True:     #this should be verbose, but it's not currently passed in. we should fix. GALA.
+            if debug_output:
                 print('tokens: ')
                 print(tokens)
                 print('DIED ON ' + evaluable)

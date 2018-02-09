@@ -20,7 +20,7 @@ def get_param_content(param):
     If it is the form of a filepath, this attempts to read and return that
     content; otherwise it treats the param as literal content.
     OSErrors, EXCEPT the obvious discriminator errno.ENAMETOOLONG which is taken
-    to mean a raw file, 
+    to mean a raw file,
     '''
     content = None
     filepath = None
@@ -46,7 +46,7 @@ def truncate_msg(message, length):
 
 
 def prettyblock(structure, indentlevel=0):
-    '''Returns a pretty-formatted string representation of a simple 
+    '''Returns a pretty-formatted string representation of a simple
     (not very nested or complicated) datastructure.
     '''
     retval = []
@@ -61,7 +61,7 @@ def prettyblock(structure, indentlevel=0):
         for key in sorted(list(structure.keys())):
             line = indent + key + ': ' + str(structure[key])
             retval.append(line.rstrip())
-            
+
     elif isinstance(structure, set):
         for item in sorted(list(structure)):
             line = indent + str(item)
@@ -74,7 +74,7 @@ def prettyblock(structure, indentlevel=0):
 
 
 def pretty_marc_field(marc_field, indentlevel=0):
-    '''Returns a pretty-formatted string representation 
+    '''Returns a pretty-formatted string representation
     of a MARC field template or populated field
     '''
     retval = []
@@ -105,7 +105,7 @@ def pretty_marc_field(marc_field, indentlevel=0):
             retval.append(line)
             for subfield in marc_field['foreach']['subfields']:
                 line = (indent + '    ' + str(subfield))
-                retval.append(line)            
+                retval.append(line)
 
         for item in ('suffix', 'sortby'):
             if item in marc_field['foreach']:
@@ -119,6 +119,7 @@ def pretty_marc_field(marc_field, indentlevel=0):
     return '\n'.join(retval) + '\n'
 
 
+#only called if verbose
 def prettyprint_marcout_engine(engine):
     print_order = engine['parse_order']
     for blockname in print_order:
