@@ -329,7 +329,7 @@ def compute_control_number(album_id, collection_abbr):
 def map_target2_audience(target_audience,explicit):
     #The 23rd value in the 008 field: e - Adult, j - Juvenile
     #MUSICat album json intendedAudienceOptions are "adult", "juvenile"
-    mapped_audience_result = '\\'
+    mapped_audience_result = '|'
     if target_audience == 'juvenile':
       mapped_audience_result = 'j'
     if explicit == True:

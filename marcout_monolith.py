@@ -206,8 +206,8 @@ def export_records(unified_json_parameter, verbose=False):
     for marc_record in exported_marc_records:
         serialized_record = sz_func(marc_record)
         # ensure exactly one blank line after record
-        serialized_record = serialized_record.rstrip('\n')
-        retval += serialized_record + '\n\n'
+        serialized_record = serialized_record.rstrip()
+        retval += serialized_record  + 'boo\n\n'
 
     return retval
 

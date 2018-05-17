@@ -82,9 +82,9 @@ def resolve_unified_json(unified_jsonobj, verbose=False):
 
     # extract unified content into discrete variables
     errors = []
-    json_contentnames = ('marcout_sourcecode', 'requested_serialization', 
+    json_contentnames = ('marcout_sourcecode', 'requested_serialization',
         'collection_info', 'records',)
-    
+
     for contentname in json_contentnames:
         if not contentname in unified_jsonobj:
             errors.append('Missing "' + contentname + '" in Unified JSON.')
@@ -124,7 +124,7 @@ def resolve_unified_json(unified_jsonobj, verbose=False):
     # are present in the JSON unified parameter, and vice versa
     marcout_paramnames = set(marcout_engine['known_parameters'])
     json_paramnames = set(collection_info.keys())
-    # Using set math: symmetric difference `^` operator will return empty 
+    # Using set math: symmetric difference `^` operator will return empty
     # set if no mismatch between operands:
     all_mismatches = marcout_paramnames ^ json_paramnames
 
@@ -171,7 +171,7 @@ def export_records(unified_jsonobj, as_string=False, verbose=False):
     export_list = serializer.serialize_records(export_list, sz_name, verbose)
 
     if as_string:
-        export_list = '\n'.join(export_list)
+        export_list = ''.join(export_list)
 
     return export_list
 
