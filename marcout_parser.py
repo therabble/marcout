@@ -144,7 +144,7 @@ def render_ldr(ldr_field_def):
     {'tag': 'LDR',
     '17': 'e',
     '19': 'g',
-    'terminator': '.',
+    'terminator': '',
     '05': 'a',
     '06': 'b',
     '07': 'c',
@@ -293,7 +293,7 @@ def parse_marcexport_deflines(deflines):
             if current_field:
                 # supply default properties
                 if 'terminator' not in current_field:
-                    current_field['terminator'] = '.'
+                    current_field['terminator'] = ''
                 # data structures need a copy
                 field_data.append(copy.copy(current_field))
                 current_field = None
@@ -355,7 +355,7 @@ def parse_marcexport_deflines(deflines):
             current_field['indicator_2'] = indc2
 
         elif line.startswith('CONTENT:'):
-            content = ':'.join(line.split(':')[1:])
+            content = ':'.join(line.split(':')[1:]).strip()
             # perform initial prep for tokenization
             content = rewrite_keyword_expr(content)
             current_field['content'] = content

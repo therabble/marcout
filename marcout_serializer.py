@@ -26,7 +26,7 @@ def serialize_text(marc_record_fields, verbose):
         retval += '  '
         for indcname in ('indicator_1', 'indicator_2'):
             # when there's no indicator at all, we represent in text as a single space
-            indc_val = ' ' 
+            indc_val = '' #don't add space for indicators where none are declared
             if indcname in field:
                 indc_val = field[indcname]
                 if not indc_val.strip():
@@ -39,7 +39,7 @@ def serialize_text(marc_record_fields, verbose):
             retval += field['fixed']
 
         if 'content' in field:
-            retval += field['content']
+            retval += field['content'].strip()
 
         # foreach will be a list of subfields, in order, with optional preceding
         # or subsequent delimiters
@@ -47,11 +47,11 @@ def serialize_text(marc_record_fields, verbose):
             for group_item in field['foreach']:
                 # group_item is a list of dicts
                 for sub_item in group_item:
-                    # sub_item dict should only ever have one key & 
+                    # sub_item dict should only ever have one key &
                     # one associated value.
                     key = list(sub_item.keys())[0]
                     if key.startswith('group_'):
-                        # it's a group marker, not a data field. 
+                        # it's a group marker, not a data field.
                         # Just append the value.
                         retval += sub_item[key]
                     else:
@@ -65,7 +65,7 @@ def serialize_text(marc_record_fields, verbose):
         elif 'subfields' in field:
             for subfield in field['subfields']:
                 retval += '$'
-                # subfield dict should only ever have one key & 
+                # subfield dict should only ever have one key &
                 # one associated value.
                 subfield_code = list(subfield.keys())[0]
                 subfield_val = str(subfield[subfield_code])
