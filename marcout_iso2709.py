@@ -248,7 +248,13 @@ def make_iso_directory(field_defs):
         # tag
         retval += field[0]
         # print('tag:' + field[0])
-        field_len = len(field[1])
+
+        # 20190312 fix per issue from Kady Ferris
+        # OLD, counts letters as a default string literal in Python3 (unicode string?), maybe undercounts bytes –>  field_len = len(field[1]) # see https://www.linuxjournal.com/content/bytes-characters-and-python-2 for wisdom
+        field_len = len(field[1].encode('utf-8'))  # <– NEW forces an encode into a byte string before counting
+                                                   #    should always count bytes properly like Python before
+                                                   #    version 3 would have
+
         # length of field content, zeropadded to 4 chars
         length = ('0000' + str(field_len))[-4:]
         # print('length: ' + length)
