@@ -8,7 +8,7 @@
 
 
 field_delimiter = chr(0x1E)
-subfield_delimiter = chr(0x1F) 
+subfield_delimiter = chr(0x1F)
 record_terminator = chr(0x1D)
 
 dir_entry_size = 12
@@ -22,15 +22,21 @@ dir_entry_size = 12
 
 def entries_in_iso_directory(directory_string):
     '''returns the list of 12-character substrings if:
-    all characters are digits; 
-    there are at least 12 characters; 
-    and the length of 
+    all characters are digits;
+    there are at least 12 characters;
+    and the length of
     the string is evenly divisible by 12 (because a directory entry
     is exactly 12 characters long).
     Otherwise raises a ValueError.
     '''
+
+    print('DIRECTORY STRING:')
+    print(directory_string)
+    print()
+    print()
+
     if not len(directory_string) >= dir_entry_size:
-        raise ValueError('Directory string parameter requires a minimum of ' 
+        raise ValueError('Directory string parameter requires a minimum of '
             + str(dir_entry_size) + 'chars.')
     if not directory_string.isdigit():
         raise ValueError('Directory string parameter contains non-numeric characters.')
@@ -38,14 +44,14 @@ def entries_in_iso_directory(directory_string):
         raise ValueError('Directory string parameter length is not an integer multiple of 12.')
 
     # get the right 12-char string from the right starting pos
-    # (list comprehension on a dir_entry_size (== 12) range, 
+    # (list comprehension on a dir_entry_size (== 12) range,
     # with slicing syntax applied to directory_string)
     return [ directory_string[i:i+dir_entry_size] for i in range(0, len(directory_string), dir_entry_size) ]
 
 
 def read_iso_field_content(dir_entry, fields_text):
     '''Accepts a single directory entry and the content text
-    that the directory indexes. Returns a tuple: 
+    that the directory indexes. Returns a tuple:
     - the field's tag (embedded in the dir_entry), and
     - the content to which the directory points.
 
@@ -68,7 +74,7 @@ def read_iso_field_content(dir_entry, fields_text):
     if not content.startswith(field_delimiter):
         # this is a problem
         raise ValueError('ISO 2709 field with tag "' + tag + '" should begin with ' + field_delimiter)
-    
+
     return tag, content
 
 
@@ -80,7 +86,7 @@ def remove_demarcators(field_content):
 
 def make_raw_field(tag_content_pair):
     '''This function accepts a 2-tuple: (a 3 digit tag string, and an
-    ISO 2709 representation of a single MARC field). It returns the 
+    ISO 2709 representation of a single MARC field). It returns the
     field in raw form, as a dict with "tag", "indicator_1", "indicator_2",
     "content", and "subfields" mappings as needed.
     '''
@@ -91,11 +97,11 @@ def make_raw_field(tag_content_pair):
     content[0] = content[0].lstrip(field_delimiter)
 
     if len(content) == 1:
-        # this field does not have subfields, nor (by MARC field 
+        # this field does not have subfields, nor (by MARC field
         # definition) indicators
         retval['content'] = content[0]
 
-    else: 
+    else:
         # the first two characters should be indicators 1 & 2 respectively
         retval['indicator_1'] = content[0][0]
         retval['indicator_2'] = content[0][1]
@@ -114,8 +120,14 @@ def iso_record_2_raw(iso_record):
     '''Parses an ISO 2709 record into MARCout raw datastructures.
     '''
     LDR = iso_record[:24]
+    print('LDR:')
+    print(LDR)
+    print()
     rest = iso_record[24:]
     first_delim_pos = rest.find(field_delimiter)
+    print('first_delim_pos:')
+    print(first_delim_pos)
+    print()
     directory = rest[:first_delim_pos]
     dir_entries = entries_in_iso_directory(directory)
     fields = rest[first_delim_pos:]
@@ -143,8 +155,8 @@ def iso_record_2_raw(iso_record):
 
 
 def raw_field_2_iso(raw_field):
-    '''This function accepts a raw datastructure(dict) representation 
-    of a record; splits that into tag and content; and returns 
+    '''This function accepts a raw datastructure(dict) representation
+    of a record; splits that into tag and content; and returns
     a 2-tuple of (tag, content) where content is flattened into a string,
     is properly formatted and delimited for ISO 2709.
     '''
@@ -168,7 +180,7 @@ def raw_field_2_iso(raw_field):
                 retval += subfield_delimiter
                 # dict with only one mapping; key is subfield code
                 if len(subfield.keys()) > 1:
-                    raise ValueError('subfield dict with multiple mappings: "' 
+                    raise ValueError('subfield dict with multiple mappings: "'
                         + str(subfield) + '".')
                 for sub_key in subfield.keys():
                     retval += sub_key
@@ -179,7 +191,7 @@ def raw_field_2_iso(raw_field):
             # repeated in "groups" corresponding to each item in the foreach.
             # There are also group-level items such as demarcators.
             # foreach is a list of lists:
-            # 
+            #
             # 'foreach': [
             #         [{
             #             't': 'Pillow'
@@ -194,15 +206,15 @@ def raw_field_2_iso(raw_field):
             # The inner list preserves the pattern (including all demarcators).
             # Each dict contains a single entry.
             #   - Normal subfields get rendered as subfields.
-            #   - Demarcators exist at the group level, and are to be rendered as 
+            #   - Demarcators exist at the group level, and are to be rendered as
             #       string literal values (not subfields) when encountered. NO
-            #       SUPPLEMENTAL SORTING is required - demarcators were sorted 
+            #       SUPPLEMENTAL SORTING is required - demarcators were sorted
             #       when data was injected into the Raw form.
 
             for group_listing in raw_field['foreach']:
 
                 for item in group_listing:
-                    # item is a dict. Should only ever have one key & 
+                    # item is a dict. Should only ever have one key &
                     # one associated value.
                     key = list(item.keys())[0]
                     if key.startswith('group_'):
@@ -236,7 +248,13 @@ def make_iso_directory(field_defs):
         # tag
         retval += field[0]
         # print('tag:' + field[0])
-        field_len = len(field[1])
+
+        # 20190312 fix per issue from Kady Ferris
+        # OLD, counts letters as a default string literal in Python3 (unicode string?), maybe undercounts bytes –>  field_len = len(field[1]) # see https://www.linuxjournal.com/content/bytes-characters-and-python-2 for wisdom
+        field_len = len(field[1].encode('utf-8'))  # <– NEW forces an encode into a byte string before counting
+                                                   #    should always count bytes properly like Python before
+                                                   #    version 3 would have
+
         # length of field content, zeropadded to 4 chars
         length = ('0000' + str(field_len))[-4:]
         # print('length: ' + length)
@@ -283,31 +301,48 @@ def raw_record_2_iso(raw_record):
 
     field_text = ''.join([field_def[1] for field_def in fields])
 
-    # put it all together
+
+    # this is a BINARY format. Take these strings of characters and
+    # turn them into byte arrays that encode the characters as utf-8.
+    # these byte arrays are string-like, with string methods.
+    directory = directory.encode('utf-8')
+    field_text = field_text.encode('utf-8')
+    field_delimiter = chr(0x1E).encode('utf-8')
+    record_terminator = chr(0x1D).encode('utf-8')
+
+    # put these arrays together as the iso record.
     iso_record = directory
-    iso_record += field_text 
+    iso_record += field_text
     iso_record += field_delimiter
     iso_record += record_terminator
 
-    # Prepend the LDR
-    # TODO FIX THIS to accept biblio data per customer preference
+    # Finish the LDR
+    # First, this needs to be modified with string operations
     record_length = 24 + len(iso_record)
-    # len as zeropadded string
+
+    # the length must be zeropadded for a total length of 5 digits
     record_length = ('00000' + str(record_length))[-5:]
     LDR = record_length + LDR[5:]
 
     # start position of record data is written to LDR positions 12:16.
-    # it's computed by len(LDR) + len(directory)
+    # it's computed by len(LDR) (always 24) + len(directory)
     fields_startpos = 24 + len(directory)
-    # len as zeropadded string
+    # fields_startpos converted to string, zeropadded to length 5 digits
     fields_startpos = ('00000' + str(fields_startpos))[-5:]
-    # (print('FIELDS STARTPOS: ' + fields_startpos))
+
+    # insert fields_startpos where it belongs
     LDR = LDR[:12] + fields_startpos + LDR[17:]
 
-    # print('LDR:')
-    # print(LDR)
+    # convert the LDR to byte array, again using UTF-8
+    LDR = LDR.encode('UTF-8')
 
+    # prepend the LDR to the record
     iso_record = LDR + iso_record
+
+    # and now, we have the correct binary content, with the correct lengths
+    # and offsets computed... but we need to convert it BACK to UTF-8
+    # for travel. Not sure this is necessary, but this is the cautious approach
+    iso_record = iso_record.decode('utf-8')
 
     return iso_record
 
